@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { listContent, optionalContent, queryString } from "@/services/content";
 import {
   BlogCard,
@@ -31,16 +32,20 @@ export async function ContentListing({
     typeof params[key] === "string" ? params[key] : "";
   return (
     <>
-      {featured && featured.data.length > 0 && (
-        <section className="section-block">
-          <h2>Featured projects</h2>
-          <div className="card-grid">
-            {featured.data.map((item) => (
-              <ProjectCard item={item} key={item.id} />
-            ))}
-          </div>
-        </section>
-      )}
+      {featured &&
+        featured.data.length > 0 &&
+        !["search", "category", "technology", "page"].some(
+          (key) => params[key],
+        ) && (
+          <section className="section-block">
+            <h2>Featured projects</h2>
+            <div className="card-grid projects-grid">
+              {featured.data.map((item) => (
+                <ProjectCard item={item} key={item.id} />
+              ))}
+            </div>
+          </section>
+        )}
       <section className="section-block">
         <h2>
           {section === "projects"
@@ -49,7 +54,12 @@ export async function ContentListing({
               ? "Articles & notes"
               : "Engineering notes"}
         </h2>
-        <form className="filter-bar" action={"/" + section}>
+        <form
+          className={
+            section === "projects" ? "filter-bar project-filters" : "filter-bar"
+          }
+          action={"/" + section}
+        >
           <label>
             Search
             <input
@@ -106,6 +116,11 @@ export async function ContentListing({
           <button className="button" type="submit">
             Apply filters
           </button>
+          {section === "projects" && (
+            <Link className="text-link" href="/projects">
+              Reset filters
+            </Link>
+          )}
         </form>
         {!result ? (
           <Unavailable />
@@ -116,7 +131,16 @@ export async function ContentListing({
           </EmptyState>
         ) : (
           <>
-            <div className="card-grid">
+            {section === "projects" && (
+              <p className="muted small project-result-count">
+                {result.meta?.total ?? result.data.length} projects
+              </p>
+            )}
+            <div
+              className={
+                section === "projects" ? "card-grid projects-grid" : "card-grid"
+              }
+            >
               {result.data.map((item) =>
                 section === "projects" ? (
                   <ProjectCard item={item} key={item.id} />

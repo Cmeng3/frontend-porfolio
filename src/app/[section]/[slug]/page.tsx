@@ -67,7 +67,10 @@ export default async function DetailPage({ params }: Props) {
     ["Future improvements", item.future_improvements],
   ];
   return (
-    <main id="main-content" className="page-shell detail-page">
+    <main
+      id="main-content"
+      className={`page-shell detail-page ${section === "projects" ? "project-detail" : ""}`}
+    >
       <Link className="text-link" href={"/" + section}>
         ← Back to {section}
       </Link>
@@ -85,6 +88,32 @@ export default async function DetailPage({ params }: Props) {
         ))}
       </div>
       <MediaImage media={item.cover} priority />
+      {section === "projects" && (
+        <div className="project-detail-summary">
+          {item.role && (
+            <div>
+              <span className="muted small">My role</span>
+              <p>{item.role}</p>
+            </div>
+          )}
+          {(item.started_on || item.ended_on) && (
+            <div>
+              <span className="muted small">Project timeline</span>
+              <p>
+                {[formatDate(item.started_on), formatDate(item.ended_on)]
+                  .filter(Boolean)
+                  .join(" – ")}
+              </p>
+            </div>
+          )}
+          <div className="link-row">
+            <ExternalLink href={item.repository_url}>
+              GitHub repository ↗
+            </ExternalLink>
+            <ExternalLink href={item.demo_url}>Live demo ↗</ExternalLink>
+          </div>
+        </div>
+      )}
       {section === "projects" ? (
         <>
           {sections.map(([title, body]) =>
@@ -141,12 +170,14 @@ export default async function DetailPage({ params }: Props) {
           </div>
         </section>
       )}
-      <div className="link-row">
-        <ExternalLink href={item.repository_url}>
-          GitHub repository ↗
-        </ExternalLink>
-        <ExternalLink href={item.demo_url}>Live demo ↗</ExternalLink>
-      </div>
+      {section !== "projects" && (
+        <div className="link-row">
+          <ExternalLink href={item.repository_url}>
+            GitHub repository ↗
+          </ExternalLink>
+          <ExternalLink href={item.demo_url}>Live demo ↗</ExternalLink>
+        </div>
+      )}
       <div className="badge-row">
         {item.tags?.map((t) => (
           <Link className="badge" href={"/blog?tag=" + t.slug} key={t.id}>

@@ -21,6 +21,18 @@ for (const resource of ["resumes", "projects"] as const) {
         data = {
           data: {
             ...schema,
+            projects: {
+              ...schema.projects,
+              fields: {
+                ...schema.projects.fields,
+                published_at: { type: "datetime-local", required: false },
+                is_visible: {
+                  type: "checkbox",
+                  required: false,
+                  default: true,
+                },
+              },
+            },
             resumes: {
               model: "Resume",
               table: "resumes",
@@ -102,6 +114,15 @@ for (const resource of ["resumes", "projects"] as const) {
         page.getByTitle("cv.pdf PDF preview", { exact: true }),
       ).toBeVisible();
     } else {
+      await expect(
+        page.getByRole("combobox", { name: "Publication", exact: true }),
+      ).toHaveValue("draft");
+      await page
+        .getByRole("combobox", { name: "Publication", exact: true })
+        .selectOption("public");
+      await page
+        .getByRole("combobox", { name: "Visible on website", exact: true })
+        .selectOption("false");
       await page
         .getByLabel("Upload screenshots & gallery", { exact: true })
         .setInputFiles(
@@ -126,7 +147,16 @@ for (const resource of ["resumes", "projects"] as const) {
       expect(saved?.media_id).toBe(1);
       expect(saved?.is_visible).toBe(true);
       expect(saved).not.toHaveProperty("published_at");
-    } else expect(saved?.media_ids).toEqual([1, 2]);
+    } else {
+      expect(saved?.media_ids).toEqual([1, 2]);
+      expect(saved?.is_visible).toBe(false);
+      expect(Date.parse(String(saved?.published_at))).not.toBeNaN();
+      await expect(page.getByText("Public", { exact: true })).toBeVisible();
+      await expect(page.getByText("Hidden", { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "View project", exact: true }),
+      ).toHaveCount(0);
+    }
     expect(
       folders.every((body) =>
         body.includes(

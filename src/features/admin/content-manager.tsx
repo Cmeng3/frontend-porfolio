@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { adminRequest } from "@/services/admin";
 import { ContentForm } from "./content-form";
+import { ProjectRecords } from "./project-records";
+import { ProjectTaxonomyRecords } from "./project-taxonomy-records";
 import type { AdminPage, RecordData, Schema } from "@/types/admin";
 export function ContentManager({
   resource,
@@ -15,6 +17,35 @@ export function ContentManager({
   const [search, setSearch] = useState("");
   const [version, setVersion] = useState(0);
   const [error, setError] = useState("");
+  const [changingVisibility, setChangingVisibility] = useState(false);
+  const taxonomy = ["project-categories", "technologies"].includes(resource);
+  async function toggleVisibility(record: RecordData) {
+    setChangingVisibility(true);
+    setError("");
+    try {
+      await adminRequest(resource + "/" + record.id, "PATCH", {
+        is_visible: record.is_visible === false,
+      });
+      setResult((current) =>
+        current
+          ? {
+              ...current,
+              data: current.data.map((item) =>
+                item.id === record.id
+                  ? { ...item, is_visible: record.is_visible === false }
+                  : item,
+              ),
+            }
+          : current,
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Could not update visibility.",
+      );
+    } finally {
+      setChangingVisibility(false);
+    }
+  }
   const [editor, setEditor] = useState<RecordData | null | undefined>(
     undefined,
   );
@@ -65,11 +96,29 @@ export function ContentManager({
   return (
     <section>
       <div className="section-top">
-        <h1>{resource.replaceAll("-", " ")}</h1>
+        <h1>
+          {resource === "technologies"
+            ? "Project technologies"
+            : resource.replaceAll("-", " ")}
+        </h1>
         <button className="button" onClick={() => setEditor(null)}>
           Add new
         </button>
       </div>
+      {taxonomy && (
+        <p className="muted">
+          Organize your projects with{" "}
+          {resource === "technologies" ? "technology labels" : "categories"}.
+          Hidden items are removed from public filters and labels; existing
+          project assignments are kept.
+        </p>
+      )}
+      {resource === "projects" && (
+        <p className="muted">
+          Manage your portfolio case studies, screenshots, and publishing
+          settings. Only Public + Visible projects are shown to visitors.
+        </p>
+      )}
       <form
         className="filter-bar"
         onSubmit={(e) => {
@@ -93,6 +142,20 @@ export function ContentManager({
         <div className="empty-state">
           No records found. Add your first entry above.
         </div>
+      ) : taxonomy ? (
+        <ProjectTaxonomyRecords
+          records={result.data}
+          pending={changingVisibility}
+          onEdit={setEditor}
+          onToggle={toggleVisibility}
+          onDelete={remove}
+        />
+      ) : resource === "projects" ? (
+        <ProjectRecords
+          records={result.data}
+          onEdit={setEditor}
+          onDelete={remove}
+        />
       ) : (
         <div className="table-scroll">
           <table>

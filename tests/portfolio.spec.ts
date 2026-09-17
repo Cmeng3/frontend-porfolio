@@ -60,6 +60,8 @@ test("all public sections and admin login load", async ({ page }) => {
     ).toBeVisible();
   }
   await page.goto("/admin");
+  await expect(page).toHaveURL(/\/admin\/login$/);
+  await expect(page).toHaveTitle(/Admin sign in/);
   await expect(
     page.getByRole("heading", { name: "Portfolio administration" }),
   ).toBeVisible();

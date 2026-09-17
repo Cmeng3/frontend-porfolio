@@ -101,8 +101,16 @@ export function TechnologyBadge({ children }: { children: React.ReactNode }) {
 }
 export function ProjectCard({ item }: { item: Content }) {
   return (
-    <article className="content-card">
-      <MediaImage media={item.cover} />
+    <article className="content-card project-card">
+      {item.cover && (
+        <Link
+          href={"/projects/" + item.slug}
+          className="project-card-cover"
+          aria-label={`View ${item.title}`}
+        >
+          <MediaImage media={item.cover} />
+        </Link>
+      )}
       <div className="card-body">
         <div className="badge-row">
           {item.category && (
@@ -114,12 +122,15 @@ export function ProjectCard({ item }: { item: Content }) {
           <Link href={"/projects/" + item.slug}>{item.title}</Link>
         </h3>
         <p>{item.summary}</p>
+        {item.status && (
+          <p className="project-status">{item.status.replaceAll("_", " ")}</p>
+        )}
         <div className="badge-row">
           {item.technologies?.map((t) => (
             <TechnologyBadge key={t.id}>{t.name}</TechnologyBadge>
           ))}
         </div>
-        <div className="link-row">
+        <div className="link-row project-card-actions">
           <Link className="text-link" href={"/projects/" + item.slug}>
             View case study ↗
           </Link>

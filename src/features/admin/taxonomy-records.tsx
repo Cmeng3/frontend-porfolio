@@ -1,13 +1,15 @@
 import { ExternalLink } from "@/components/ui/content-ui";
 import type { RecordData } from "@/types/admin";
 
-export function ProjectTaxonomyRecords({
+export function TaxonomyRecords({
+  usage = "projects",
   records,
   pending,
   onEdit,
   onToggle,
   onDelete,
 }: {
+  usage?: "projects" | "skills";
   records: RecordData[];
   pending: boolean;
   onEdit: (record: RecordData) => void;
@@ -18,7 +20,7 @@ export function ProjectTaxonomyRecords({
     <div className="taxonomy-grid">
       {records.map((record) => {
         const visible = record.is_visible !== false;
-        const count = Number(record.projects_count || 0);
+        const count = Number(record[usage + "_count"] || 0);
         return (
           <article className="taxonomy-card" key={record.id}>
             <div className="taxonomy-card-heading">
@@ -39,7 +41,8 @@ export function ProjectTaxonomyRecords({
               </ExternalLink>
             ) : null}
             <p className="muted small">
-              Used in {count} {count === 1 ? "project" : "projects"}
+              {usage === "projects" ? "Used in " : ""}
+              {count} {count === 1 ? usage.slice(0, -1) : usage}
               {record.sort_order !== undefined
                 ? ` · Display order ${record.sort_order}`
                 : ""}

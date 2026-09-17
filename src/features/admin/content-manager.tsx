@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { adminRequest } from "@/services/admin";
 import { ContentForm } from "./content-form";
 import { ProjectRecords } from "./project-records";
-import { ProjectTaxonomyRecords } from "./project-taxonomy-records";
+import { TaxonomyRecords } from "./taxonomy-records";
 import type { AdminPage, RecordData, Schema } from "@/types/admin";
 export function ContentManager({
   resource,
@@ -18,7 +18,11 @@ export function ContentManager({
   const [version, setVersion] = useState(0);
   const [error, setError] = useState("");
   const [changingVisibility, setChangingVisibility] = useState(false);
-  const taxonomy = ["project-categories", "technologies"].includes(resource);
+  const taxonomy = [
+    "project-categories",
+    "technologies",
+    "skill-categories",
+  ].includes(resource);
   async function toggleVisibility(record: RecordData) {
     setChangingVisibility(true);
     setError("");
@@ -105,13 +109,21 @@ export function ContentManager({
           Add new
         </button>
       </div>
-      {taxonomy && (
+      {resource === "skill-categories" ? (
         <p className="muted">
-          Organize your projects with{" "}
-          {resource === "technologies" ? "technology labels" : "categories"}.
-          Hidden items are removed from public filters and labels; existing
-          project assignments are kept.
+          Organize your skills into clear groups. Hide a category to remove its
+          group from the public Skills page while keeping every skill and
+          assignment in your admin library.
         </p>
+      ) : (
+        taxonomy && (
+          <p className="muted">
+            Organize your projects with{" "}
+            {resource === "technologies" ? "technology labels" : "categories"}.
+            Hidden items are removed from public filters and labels; existing
+            project assignments are kept.
+          </p>
+        )
       )}
       {resource === "projects" && (
         <p className="muted">
@@ -143,7 +155,8 @@ export function ContentManager({
           No records found. Add your first entry above.
         </div>
       ) : taxonomy ? (
-        <ProjectTaxonomyRecords
+        <TaxonomyRecords
+          usage={resource === "skill-categories" ? "skills" : "projects"}
           records={result.data}
           pending={changingVisibility}
           onEdit={setEditor}

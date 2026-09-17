@@ -47,24 +47,32 @@ export async function SkillsSection() {
   );
   return (
     <div className="card-grid">
-      {Array.from(groups).map(([category, skills]) => (
-        <section className="content-card card-body" key={category}>
-          <h2>{category}</h2>
-          <ul className="skill-list">
-            {skills.map((skill) => (
-              <li key={skill.id}>
-                <span>
-                  {skill.icon && <span aria-hidden="true">{skill.icon} </span>}
-                  {skill.name}
-                </span>
-                {skill.proficiency && (
-                  <TechnologyBadge>{skill.proficiency}</TechnologyBadge>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+      {Array.from(groups)
+        .sort(
+          (a, b) =>
+            (a[1][0].category?.sort_order ?? 0) -
+              (b[1][0].category?.sort_order ?? 0) || a[0].localeCompare(b[0]),
+        )
+        .map(([category, skills]) => (
+          <section className="content-card card-body" key={category}>
+            <h2>{category}</h2>
+            <ul className="skill-list">
+              {skills.map((skill) => (
+                <li key={skill.id}>
+                  <span>
+                    {skill.icon && (
+                      <span aria-hidden="true">{skill.icon} </span>
+                    )}
+                    {skill.name}
+                  </span>
+                  {skill.proficiency && (
+                    <TechnologyBadge>{skill.proficiency}</TechnologyBadge>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
     </div>
   );
 }

@@ -104,6 +104,7 @@ export function ContentForm({
               "resumes",
               "projects",
               "project-categories",
+              "skill-categories",
               "technologies",
             ].includes(resource) && name === "is_visible"
               ? form.get(name) === "true"
@@ -154,7 +155,9 @@ export function ContentForm({
         </button>
       </div>
       <p className="muted small">
-        {["project-categories", "technologies"].includes(resource) ? (
+        {resource === "skill-categories" ? (
+          "Choose Visible to show this group on the Skills page, or Hidden to hide the group and its skills. Your skills and assignments are kept. Lower display order values appear first. Save changes to apply your settings."
+        ) : ["project-categories", "technologies"].includes(resource) ? (
           "Choose Visible to show this item in public filters and labels, or Hidden to keep it in your admin library. Hiding a label does not hide its projects. Use a lowercase slug with hyphens, then save changes."
         ) : resource === "projects" ? (
           "Build your case study below. Save as Draft while working, or select Public and Visible when it is ready to share."
@@ -260,6 +263,7 @@ export function ContentForm({
                     "resumes",
                     "projects",
                     "project-categories",
+                    "skill-categories",
                     "technologies",
                   ].includes(resource) && name === "is_visible" ? (
                   <select

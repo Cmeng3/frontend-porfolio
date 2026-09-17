@@ -1,6 +1,10 @@
 import { test, expect } from "@playwright/test";
 
-for (const resource of ["project-categories", "technologies"]) {
+for (const resource of [
+  "project-categories",
+  "technologies",
+  "skill-categories",
+]) {
   test(`${resource} visibility works in list and edit form`, async ({
     page,
   }) => {
@@ -10,6 +14,7 @@ for (const resource of ["project-categories", "technologies"]) {
       slug: "backend",
       is_visible: true,
       projects_count: 2,
+      skills_count: 2,
     };
     await page.route("**/api/v1/admin/**", async (route) => {
       const path = new URL(route.request().url()).pathname.split("/admin/")[1];
@@ -51,7 +56,10 @@ for (const resource of ["project-categories", "technologies"]) {
     });
     await page.goto(`/admin/${resource}`);
     await expect(
-      page.getByText("Used in 2 projects", { exact: true }),
+      page.getByText(
+        resource === "skill-categories" ? "2 skills" : "Used in 2 projects",
+        { exact: true },
+      ),
     ).toBeVisible();
     await page
       .getByRole("button", { name: "Hide Backend", exact: true })

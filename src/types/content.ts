@@ -9,6 +9,7 @@ export interface Media {
 }
 export interface Content {
   id: number;
+  sort_order?: number;
   title?: string;
   name?: string;
   slug?: string;

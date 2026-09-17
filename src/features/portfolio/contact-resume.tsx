@@ -15,27 +15,47 @@ export async function ContactSection() {
   ]);
   const profile = profiles?.data[0];
   return (
-    <div className="about-grid">
-      <ContactForm />
-      <aside className="profile-aside">
-        <h2>Let’s build something useful.</h2>
+    <div className="contact-layout">
+      <aside className="contact-details">
+        <p className="eyebrow">
+          <span className="status-dot" /> Open to opportunities
+        </p>
+        <h2>
+          Good software starts
+          <br />
+          with a conversation.
+        </h2>
         <p>
           {profile?.availability ||
             "Available for Backend, Full-Stack, Mobile, and Software Engineering opportunities."}
         </p>
         {profile?.public_email && (
-          <a className="text-link" href={"mailto:" + profile.public_email}>
-            {profile.public_email}
-          </a>
+          <div className="contact-direct">
+            <span className="contact-note">Prefer email?</span>
+            <a className="text-link" href={"mailto:" + profile.public_email}>
+              {profile.public_email} ↗
+            </a>
+          </div>
         )}
-        <div className="link-row">
+        {profile?.location && (
+          <p className="contact-location">Based in {profile.location}</p>
+        )}
+        <div className="link-row contact-socials">
           {socials?.data.map((s) => (
             <ExternalLink key={s.id} href={s.url}>
               {s.label || s.platform}
             </ExternalLink>
           ))}
         </div>
+        <div className="contact-guidance">
+          <h3>What to include</h3>
+          <p>
+            A short introduction, a little about the opportunity, and the best
+            way to reach you. A job description or project link is welcome.
+          </p>
+        </div>
       </aside>
+      <ContactForm />
     </div>
   );
 }

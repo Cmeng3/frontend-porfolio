@@ -231,7 +231,7 @@ export function ContentForm({
                   required={spec.required}
                 >
                   <option value="">Not specified</option>
-                  {spec.options?.map((o) => (
+                  {[...new Set(spec.options || [])].map((o) => (
                     <option key={o} value={o}>
                       {label(o)}
                     </option>

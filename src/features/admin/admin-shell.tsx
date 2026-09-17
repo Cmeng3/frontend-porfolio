@@ -8,6 +8,7 @@ import { ContentManager } from "./content-manager";
 import { MediaLibrary } from "./media-library";
 import { WebsiteEditor } from "./website-editor";
 import { UploadCenter } from "./upload-center";
+import { ContactInbox } from "./contact-inbox";
 import type { Schema, RecordData } from "@/types/admin";
 type Dashboard = {
   counts: Record<string, number>;
@@ -228,6 +229,8 @@ export function AdminShell({
           <WebsiteEditor onDirtyChange={setWebsiteDirty} />
         ) : selected === "uploads" ? (
           <UploadCenter />
+        ) : selected === "contact-messages" ? (
+          <ContactInbox />
         ) : selected === "media" ? (
           <MediaLibrary />
         ) : schema[selected] ? (

@@ -49,7 +49,6 @@ test("all public sections and admin login load", async ({ page }) => {
     ["experience", "Experience"],
     ["education", "Education"],
     ["certifications", "Certifications"],
-    ["engineering", "Engineering"],
     ["blog", "Blog"],
     ["resume", "Resume"],
     ["contact", "Contact"],

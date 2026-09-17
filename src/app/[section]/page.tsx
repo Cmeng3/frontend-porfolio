@@ -22,10 +22,6 @@ const sections: Record<string, [string, string]> = {
     "Certifications",
     "Verified learning and professional credentials.",
   ],
-  engineering: [
-    "Engineering",
-    "System design, backend architecture, APIs, databases, cloud, DevOps, distributed systems, and security.",
-  ],
   blog: ["Blog", "Notes on building software and understanding how it works."],
   resume: ["Resume", "My background, experience, and skills in one place."],
   contact: ["Contact", "Have a role or a project in mind? Let’s talk."],
@@ -70,9 +66,7 @@ export default async function SectionPage({
         <ContactSection />
       ) : section === "resume" ? (
         <ResumeSection />
-      ) : section === "projects" ||
-        section === "blog" ||
-        section === "engineering" ? (
+      ) : section === "projects" || section === "blog" ? (
         <ContentListing section={section} params={search} />
       ) : section === "experience" ||
         section === "education" ||

@@ -10,7 +10,6 @@ export const adminMenu = [
   ["experience", "Experience"],
   ["education", "Education"],
   ["certifications", "Certifications"],
-  ["engineering", "Engineering"],
   ["blog", "Blog posts"],
   ["blog-categories", "Blog categories"],
   ["blog-tags", "Blog tags"],

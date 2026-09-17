@@ -31,11 +31,6 @@ const areas = [
     "Edit a post to upload its cover and article gallery images.",
   ],
   [
-    "engineering",
-    "Engineering diagrams",
-    "Edit an engineering article to upload diagrams and supporting images.",
-  ],
-  [
     "experience",
     "Company logos",
     "Edit an experience entry to upload its company logo.",

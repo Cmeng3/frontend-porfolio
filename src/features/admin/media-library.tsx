@@ -89,7 +89,6 @@ export function MediaLibrary() {
               "blog",
               "certificates",
               "education",
-              "engineering",
               "resume",
             ].map((f) => (
               <option value={"portfolio/" + f} key={f}>

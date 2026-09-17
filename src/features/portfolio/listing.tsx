@@ -12,7 +12,7 @@ export async function ContentListing({
   section,
   params,
 }: {
-  section: "projects" | "blog" | "engineering";
+  section: "projects" | "blog";
   params: SearchParams;
 }) {
   const categoriesResource =
@@ -47,13 +47,7 @@ export async function ContentListing({
           </section>
         )}
       <section className="section-block">
-        <h2>
-          {section === "projects"
-            ? "All projects"
-            : section === "blog"
-              ? "Articles & notes"
-              : "Engineering notes"}
-        </h2>
+        <h2>{section === "projects" ? "All projects" : "Articles & notes"}</h2>
         <form
           className={
             section === "projects" ? "filter-bar project-filters" : "filter-bar"

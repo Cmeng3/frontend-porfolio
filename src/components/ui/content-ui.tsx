@@ -166,7 +166,7 @@ export function BlogCard({
           {formatDate(item.published_at)} · {item.reading_minutes || 1} min read
         </p>
         <Link className="text-link" href={"/" + section + "/" + item.slug}>
-          Read {section === "engineering" ? "engineering note" : "article"} ↗
+          Read article ↗
         </Link>
       </div>
     </article>

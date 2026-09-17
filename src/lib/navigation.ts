@@ -6,7 +6,6 @@ export const navigation = [
   { label: "Experience", href: "/experience" },
   { label: "Education", href: "/education" },
   { label: "Certifications", href: "/certifications" },
-  { label: "Engineering", href: "/engineering" },
   { label: "Blog", href: "/blog" },
   { label: "Resume", href: "/resume" },
   { label: "Contact", href: "/contact" },
@@ -24,8 +23,6 @@ export const sectionDescriptions: Record<string, string> = {
   education:
     "Bachelor of Computer Science — Paragon International University. Coursework and further details will be added here.",
   certifications: "No certifications have been published yet.",
-  engineering:
-    "System design, backend architecture, APIs, databases, and deployment. Engineering notes and diagrams will be published here.",
   blog: "Notes on software engineering and what I am learning. No articles have been published yet.",
   resume:
     "The resume PDF is not available yet. A preview and download will appear once it has been uploaded.",

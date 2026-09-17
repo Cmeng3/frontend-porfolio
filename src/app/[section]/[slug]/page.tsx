@@ -14,7 +14,7 @@ import {
 import { RichContent } from "@/components/ui/rich-content";
 type Props = { params: Promise<{ section: string; slug: string }> };
 async function load(section: string, slug: string) {
-  if (!["projects", "blog", "engineering"].includes(section)) notFound();
+  if (!["projects", "blog"].includes(section)) notFound();
   try {
     return (await getContent(section, slug)).data;
   } catch (error) {

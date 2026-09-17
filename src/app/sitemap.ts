@@ -6,7 +6,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = navigation.map((n) => ({
     url: base + n.href,
   }));
-  for (const section of ["projects", "blog", "engineering"]) {
+  for (const section of ["projects", "blog"]) {
     let page = 1;
     try {
       for (;;) {

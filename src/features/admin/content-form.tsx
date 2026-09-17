@@ -1,0 +1,289 @@
+"use client";
+import { useEffect, useState, type FormEvent } from "react";
+import { adminRequest, allAdminRecords, AdminError } from "@/services/admin";
+import type { Definition, RecordData, Schema } from "@/types/admin";
+import { MediaField } from "./media-field";
+function label(value: string) {
+  if (value === "is_visible") return "Visible on website";
+  return value.replaceAll("_", " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+export function ContentForm({
+  resource,
+  definition,
+  schema,
+  record,
+  onSaved,
+  onCancel,
+}: {
+  resource: string;
+  definition: Definition;
+  schema: Schema;
+  record: RecordData | null;
+  onSaved: () => void;
+  onCancel: () => void;
+}) {
+  const [options, setOptions] = useState<Record<string, RecordData[]>>({});
+  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [referenceError, setReferenceError] = useState(false);
+  useEffect(() => {
+    let active = true;
+    const refs = [
+      ...new Set(
+        Object.values(definition.fields)
+          .map((f) => f.reference)
+          .filter((x): x is string => !!x),
+      ),
+    ];
+    Promise.all(
+      refs.map(async (ref) => {
+        const endpoint =
+          ref === "media"
+            ? "media"
+            : Object.keys(schema).find((k) => schema[k].table === ref);
+        return [ref, endpoint ? await allAdminRecords(endpoint) : []] as const;
+      }),
+    )
+      .then((entries) => {
+        if (active) {
+          setOptions(Object.fromEntries(entries));
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setError(
+            "Could not load related records. Reload this editor before saving.",
+          );
+          setReferenceError(true);
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [definition, schema]);
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (uploading) return;
+    const form = new FormData(event.currentTarget);
+    setBusy(true);
+    setError("");
+    setErrors({});
+    try {
+      const values: Record<string, unknown> = {};
+      for (const [name, spec] of Object.entries(definition.fields)) {
+        if (spec.type === "checkbox") {
+          values[name] =
+            resource === "resumes" && name === "is_visible"
+              ? form.get(name) === "true"
+              : form.has(name);
+          continue;
+        }
+        if (spec.type === "multi-reference") {
+          values[name] = form.getAll(name).map(Number);
+          continue;
+        }
+        const raw = String(form.get(name) || "");
+        values[name] =
+          raw === ""
+            ? null
+            : spec.type === "json"
+              ? JSON.parse(raw)
+              : ["number", "reference"].includes(spec.type)
+                ? Number(raw)
+                : raw;
+      }
+      await adminRequest(
+        resource + (record ? "/" + record.id : ""),
+        record ? "PUT" : "POST",
+        values,
+      );
+      onSaved();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not save.");
+      if (e instanceof AdminError) setErrors(e.errors);
+    } finally {
+      setBusy(false);
+    }
+  }
+  if (loading) return <p role="status">Loading editor…</p>;
+  return (
+    <section className="admin-editor">
+      <div className="section-top">
+        <h2>
+          {record ? "Edit" : "Create"} {resource.replaceAll("-", " ")}
+        </h2>
+        <button
+          type="button"
+          className="button secondary"
+          onClick={onCancel}
+          disabled={busy || uploading}
+        >
+          Cancel
+        </button>
+      </div>
+      <p className="muted small">
+        {resource === "resumes" ? (
+          "Upload or select your CV, choose Visible or Hidden, and save changes. Visible resumes appear immediately on the Resume page and homepage download link."
+        ) : (
+          <>
+            Long content supports Markdown. Leave publication date empty to keep
+            a draft. Dates use the API timezone (UTC). Upload photos and PDFs
+            directly below, or choose existing files from your library. Save
+            changes to attach them.
+          </>
+        )}
+      </p>
+      <form onSubmit={submit} className="editor-grid">
+        {Object.entries(definition.fields).map(([name, spec]) => {
+          const original = spec.relation
+            ? (record?.[spec.relation] as RecordData[] | undefined)?.map((r) =>
+                String(r.id),
+              ) || []
+            : (record?.[name] ?? spec.default);
+          let value =
+            original === null || original === undefined
+              ? ""
+              : typeof original === "object"
+                ? JSON.stringify(original, null, 2)
+                : String(original);
+          if (spec.type === "date") value = value.slice(0, 10);
+          if (spec.type === "datetime-local") value = value.slice(0, 16);
+          const id = "field-" + name;
+          if (spec.reference === "media")
+            return (
+              <MediaField
+                key={name}
+                name={name}
+                resource={resource}
+                records={options.media || []}
+                initial={
+                  spec.type === "multi-reference"
+                    ? (original as string[])
+                    : value
+                }
+                multiple={spec.type === "multi-reference"}
+                required={spec.required}
+                error={errors[name]?.join(" ")}
+                disabled={busy || uploading || referenceError}
+                onBusy={setUploading}
+              />
+            );
+          return (
+            <label
+              htmlFor={id}
+              className={
+                ["textarea", "json", "multi-reference"].includes(spec.type)
+                  ? "wide"
+                  : ""
+              }
+              key={name}
+            >
+              {label(name)}
+              {spec.required ? " *" : ""}
+              {resource === "resumes" && name === "is_visible" ? (
+                <select
+                  id={id}
+                  name={name}
+                  defaultValue={original ? "true" : "false"}
+                >
+                  <option value="true">Visible</option>
+                  <option value="false">Hidden</option>
+                </select>
+              ) : spec.type === "checkbox" ? (
+                <input
+                  id={id}
+                  name={name}
+                  type="checkbox"
+                  defaultChecked={!!original}
+                />
+              ) : spec.type === "reference" ||
+                spec.type === "multi-reference" ? (
+                <select
+                  id={id}
+                  name={name}
+                  multiple={spec.type === "multi-reference"}
+                  size={spec.type === "multi-reference" ? 5 : undefined}
+                  defaultValue={
+                    spec.type === "multi-reference"
+                      ? (original as string[])
+                      : value
+                  }
+                  required={spec.required}
+                  disabled={loading}
+                >
+                  {spec.type === "reference" && <option value="">None</option>}
+                  {(options[spec.reference!] || []).map((o) => (
+                    <option value={o.id} key={o.id}>
+                      {String(o.title || o.name || o.original_name || o.id)}
+                    </option>
+                  ))}
+                </select>
+              ) : spec.type === "select" ? (
+                <select
+                  id={id}
+                  name={name}
+                  defaultValue={value}
+                  required={spec.required}
+                >
+                  <option value="">Not specified</option>
+                  {spec.options?.map((o) => (
+                    <option key={o} value={o}>
+                      {label(o)}
+                    </option>
+                  ))}
+                </select>
+              ) : spec.type === "textarea" || spec.type === "json" ? (
+                <textarea
+                  id={id}
+                  name={name}
+                  defaultValue={value}
+                  rows={spec.type === "json" ? 4 : 5}
+                  required={spec.required}
+                />
+              ) : (
+                <input
+                  id={id}
+                  name={name}
+                  type={spec.type}
+                  defaultValue={value}
+                  required={spec.required}
+                  min={spec.type === "number" ? 0 : undefined}
+                />
+              )}
+              {spec.type === "multi-reference" && (
+                <span className="muted small">
+                  Hold Ctrl (Windows) or Command (Mac) to select multiple
+                  entries.
+                </span>
+              )}
+              {name === "value" && spec.type === "json" && (
+                <span className="muted small">
+                  Enter a JSON object, for example {`{"text":"Your text"}`}.
+                </span>
+              )}
+              {errors[name] && (
+                <span className="field-error">{errors[name].join(" ")}</span>
+              )}
+            </label>
+          );
+        })}
+        <div className="wide">
+          <p role="alert" className="error-message">
+            {error}
+          </p>
+          <button
+            className="button"
+            disabled={busy || uploading || loading || referenceError}
+          >
+            {busy ? "Saving…" : "Save changes"}
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+}

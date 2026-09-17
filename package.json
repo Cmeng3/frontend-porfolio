@@ -1,0 +1,38 @@
+{
+  "name": "portfolio-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/next.cjs dev --webpack",
+    "build": "node scripts/next.cjs build --webpack",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "next": "16.3.5",
+    "pdfjs-dist": "^6.3.289",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@next/swc-wasm-nodejs": "16.3.5",
+    "@playwright/test": "^1.63.0",
+    "@tailwindcss/oxide": "4.2.1",
+    "@tailwindcss/postcss": "4.2.1",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.5",
+    "prettier": "^3.9.6",
+    "tailwindcss": "4.2.1",
+    "typescript": "^5"
+  }
+}

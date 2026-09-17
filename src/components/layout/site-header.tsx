@@ -18,8 +18,11 @@ function profileUrl(value: string | undefined, ...hosts: string[]) {
 }
 
 export async function SiteHeader() {
-  const profile = (await optionalContent("profile"))?.data[0];
-  const socialLinks = await optionalContent("social-links", "per_page=100");
+  const [profilesResult, socialLinks] = await Promise.all([
+    optionalContent("profile"),
+    optionalContent("social-links", "per_page=100"),
+  ]);
+  const profile = profilesResult?.data[0];
   const github = socialLinks?.data.find(
     (item) => item.platform?.toLowerCase() === "github",
   )?.url;

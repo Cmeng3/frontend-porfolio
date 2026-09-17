@@ -11,15 +11,15 @@ import {
   Unavailable,
 } from "@/components/ui/content-ui";
 export default async function Home() {
-  const copy = await siteSettings();
-  const [profiles, projects, technologies, experience, resumes, socials] =
+  const [copy, profiles, projects, technologies, experience, resumes, socials] =
     await Promise.all([
+      siteSettings(),
       optionalContent("profile"),
       optionalContent("projects", "featured=1&per_page=3"),
       optionalContent("technologies", "per_page=12"),
       optionalContent("experience", "per_page=2"),
       optionalContent("resumes", "per_page=1"),
-      optionalContent("social-links"),
+      optionalContent("social-links", "per_page=100"),
     ]);
   const profile = profiles?.data[0];
   const github =

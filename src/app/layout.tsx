@@ -7,8 +7,11 @@ import { siteSettings } from "@/services/site";
 import { optionalContent } from "@/services/content";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await siteSettings();
-  const logo = (await optionalContent("profile"))?.data[0]?.logo;
+  const [settings, profiles] = await Promise.all([
+    siteSettings(),
+    optionalContent("profile"),
+  ]);
+  const logo = profiles?.data[0]?.logo;
   return {
     metadataBase: new URL(
       process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",

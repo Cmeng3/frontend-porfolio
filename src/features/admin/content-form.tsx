@@ -127,7 +127,9 @@ export function ContentForm({
         </button>
       </div>
       <p className="muted small">
-        {resource === "resumes" ? (
+        {resource === "education" || resource === "certifications" ? (
+          "Upload a JPG, PNG or WEBP image for the visual preview and an optional PDF for the full document. Save changes to attach your files. Set Published At to today or an earlier date to show this entry on your website."
+        ) : resource === "resumes" ? (
           "Upload or select your CV, choose Visible or Hidden, and save changes. Visible resumes appear immediately on the Resume page and homepage download link."
         ) : (
           <>

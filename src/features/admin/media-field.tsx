@@ -39,7 +39,14 @@ export function MediaField({
   onBusy: (busy: boolean) => void;
 }) {
   const pdf = resource === "resumes" || name === "pdf_media_id";
-  const title = resource === "resumes" ? "Resume PDF" : names[name] || "Image";
+  const title =
+    resource === "resumes"
+      ? "Resume PDF"
+      : resource === "education"
+        ? pdf
+          ? "Education PDF"
+          : "Education photo or diploma image"
+        : names[name] || "Image";
   const folder =
     resource === "resumes"
       ? "resume"

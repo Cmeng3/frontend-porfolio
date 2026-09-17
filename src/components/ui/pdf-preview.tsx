@@ -1,4 +1,4 @@
-import { ExternalLink, safeUrl } from "./content-ui";
+import { safeUrl } from "./content-ui";
 export function PdfPreview({ url, title }: { url: string; title: string }) {
   const safe = safeUrl(url);
   if (!safe) return null;
@@ -10,10 +10,6 @@ export function PdfPreview({ url, title }: { url: string; title: string }) {
         title={title + " PDF preview"}
         loading="lazy"
       />
-      <ExternalLink href={safe}>Preview PDF ↗</ExternalLink>
-      <p className="muted small">
-        If your browser cannot display PDFs here, open the preview in a new tab.
-      </p>
     </div>
   );
 }

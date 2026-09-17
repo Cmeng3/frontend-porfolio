@@ -8,6 +8,7 @@ import {
   formatDate,
 } from "@/components/ui/content-ui";
 import { RichContent } from "@/components/ui/rich-content";
+import { QualificationCard } from "./qualification-card";
 export async function CareerSection({
   section,
 }: {
@@ -23,6 +24,23 @@ export async function CareerSection({
           : "Details will be published once they are ready to share."}
       </EmptyState>
     );
+  if (section !== "experience") {
+    return (
+      <div
+        className={
+          section === "education" ? "education-list" : "certification-grid"
+        }
+      >
+        {result.data.map((item) => (
+          <QualificationCard
+            key={item.id}
+            item={item}
+            education={section === "education"}
+          />
+        ))}
+      </div>
+    );
+  }
   return (
     <div className="timeline">
       {result.data.map((item) => (

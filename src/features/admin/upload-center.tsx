@@ -1,6 +1,11 @@
 import Link from "next/link";
 const areas = [
   [
+    "education",
+    "Education photos & documents",
+    "Edit your education to upload a campus photo, diploma image, or supporting PDF, then save the entry.",
+  ],
+  [
     "website",
     "Profile photo & portfolio logo",
     "Upload your portrait or replace your CL logo, then save your profile.",

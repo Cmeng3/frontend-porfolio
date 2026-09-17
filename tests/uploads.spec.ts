@@ -99,7 +99,7 @@ for (const resource of ["resumes", "projects"] as const) {
         });
       await expect(page.locator('select[name="media_id"]')).toHaveValue("1");
       await expect(
-        page.getByRole("link", { name: "Preview PDF" }),
+        page.getByTitle("cv.pdf PDF preview", { exact: true }),
       ).toBeVisible();
     } else {
       await page

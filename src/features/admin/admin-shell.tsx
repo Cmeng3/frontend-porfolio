@@ -86,9 +86,10 @@ export function AdminShell({
         }
       } catch (e) {
         if (active) {
-          if (e instanceof AdminError && [401, 403, 419].includes(e.status))
+          if (e instanceof AdminError && [401, 403, 419].includes(e.status)) {
             setUser(null);
-          else
+            router.replace("/admin/login");
+          } else
             setError(
               e instanceof Error ? e.message : "Could not connect to the API.",
             );
@@ -99,7 +100,37 @@ export function AdminShell({
     return () => {
       active = false;
     };
-  }, [version]);
+  }, [version, router]);
+  useEffect(() => {
+    if (user && selected === "login") router.replace("/admin");
+  }, [user, selected, router]);
+  useEffect(() => {
+    function expired() {
+      setUser(null);
+      setSchema({});
+      setDashboard(null);
+      setWebsiteDirty(false);
+      router.replace("/admin/login");
+    }
+    async function verify() {
+      if (!user || document.visibilityState !== "visible") return;
+      try {
+        await adminRequest("me");
+      } catch (error) {
+        if (
+          error instanceof AdminError &&
+          [401, 403, 419].includes(error.status)
+        )
+          expired();
+      }
+    }
+    window.addEventListener("admin-session-expired", expired);
+    window.addEventListener("focus", verify);
+    return () => {
+      window.removeEventListener("admin-session-expired", expired);
+      window.removeEventListener("focus", verify);
+    };
+  }, [user, router]);
   async function logout() {
     if (
       websiteDirty &&
@@ -114,6 +145,7 @@ export function AdminShell({
       setSchema({});
       setDashboard(null);
       setWebsiteDirty(false);
+      router.replace("/admin/login");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Logout failed.");
     }
@@ -129,7 +161,13 @@ export function AdminShell({
         )}
       </div>
     );
-  if (!user) return <LoginPanel onLogin={() => setVersion((v) => v + 1)} />;
+  if (!user)
+    return selected === "login" ? (
+      <LoginPanel onLogin={() => router.replace("/admin")} />
+    ) : (
+      <p role="status">Redirecting to sign in…</p>
+    );
+  if (selected === "login") return <p role="status">Opening your workspace…</p>;
   return (
     <div className="admin-layout">
       <aside className="admin-sidebar">

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, type FormEvent } from "react";
-import { adminRequest, allAdminRecords } from "@/services/admin";
+import { adminRequest } from "@/services/admin";
 import type { AdminPage, RecordData } from "@/types/admin";
 import { MediaImage, ExternalLink } from "@/components/ui/content-ui";
 import type { Media } from "@/types/content";
@@ -48,33 +48,6 @@ export function MediaLibrary() {
       setStatus(e instanceof Error ? e.message : "Delete failed.");
     }
   }
-  async function publishResume(item: RecordData) {
-    setBusy(true);
-    try {
-      const existing = (await allAdminRecords("resumes")).find(
-        (r) => Number(r.media_id) === item.id,
-      );
-      await adminRequest(
-        existing ? "resumes/" + existing.id : "resumes",
-        existing ? "PATCH" : "POST",
-        existing
-          ? { is_visible: true }
-          : {
-              title: String(item.original_name).replace(/\.pdf$/i, ""),
-              media_id: item.id,
-              locale: "en",
-              is_visible: true,
-            },
-      );
-      setStatus(
-        "CV connected and visible on the Resume page and homepage download button.",
-      );
-    } catch (e) {
-      setStatus(e instanceof Error ? e.message : "Could not connect the CV.");
-    } finally {
-      setBusy(false);
-    }
-  }
   async function alt(e: FormEvent<HTMLFormElement>, id: number) {
     e.preventDefault();
     try {
@@ -115,6 +88,7 @@ export function MediaLibrary() {
               "projects",
               "blog",
               "certificates",
+              "education",
               "engineering",
               "resume",
             ].map((f) => (
@@ -149,15 +123,6 @@ export function MediaLibrary() {
               #{item.id} · {Math.ceil(Number(item.size) / 1024)} KB
             </p>
             <ExternalLink href={String(item.url)}>Open file</ExternalLink>
-            {item.mime_type === "application/pdf" && (
-              <button
-                className="button secondary"
-                disabled={busy}
-                onClick={() => publishResume(item)}
-              >
-                Use as visible resume
-              </button>
-            )}
             <label>
               File URL
               <input

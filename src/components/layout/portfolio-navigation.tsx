@@ -20,7 +20,13 @@ export function PortfolioNavigation({
     return (
       <header className="site-header">
         <div className="header-top">
-          <Link href="/admin" className="brand" aria-label="Admin dashboard">
+          <Link
+            href={pathname === "/admin/login" ? "/admin/login" : "/admin"}
+            className="brand"
+            aria-label={
+              pathname === "/admin/login" ? "Admin sign in" : "Admin dashboard"
+            }
+          >
             <span className="brand-mark" aria-hidden="true">
               {logo ? (
                 <MediaImage media={logo} priority />

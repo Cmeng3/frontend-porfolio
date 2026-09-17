@@ -11,7 +11,7 @@ export async function SiteFooter() {
           © {new Date().getFullYear()} {profiles?.data[0]?.name || "Chimeng Ly"}
         </p>
         <p>{settings.footer}</p>
-        <Link className="text-link" href="/admin/website">
+        <Link className="text-link" href="/admin">
           Manage website
         </Link>
       </div>

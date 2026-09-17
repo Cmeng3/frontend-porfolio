@@ -42,6 +42,13 @@ export async function adminRequest<T>(
     signal: AbortSignal.timeout(30000),
   });
   if (response.status === 204) return undefined as T;
+  if (
+    path !== "login" &&
+    [401, 403, 419].includes(response.status) &&
+    typeof window !== "undefined"
+  ) {
+    window.dispatchEvent(new Event("admin-session-expired"));
+  }
   const data = await response.json();
   if (!response.ok)
     throw new AdminError(

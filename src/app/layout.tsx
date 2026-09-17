@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { siteSettings } from "@/services/site";
 import { optionalContent } from "@/services/content";
+import { getSiteUrl } from "@/lib/site-url";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [settings, profiles] = await Promise.all([
@@ -13,9 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   ]);
   const logo = profiles?.data[0]?.logo;
   return {
-    metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-    ),
+    metadataBase: new URL(getSiteUrl()),
     title: {
       default: settings.title,
       template: "%s | Chimeng Ly",

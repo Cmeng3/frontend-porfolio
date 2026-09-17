@@ -155,7 +155,9 @@ export function ContentForm({
         </button>
       </div>
       <p className="muted small">
-        {resource === "skill-categories" ? (
+        {resource === "social-links" ? (
+          "Add your profile URL, select Visible on website, and save. GitHub, LinkedIn, Telegram, and Facebook appear as header icons. Telegram example: https://t.me/your_username. Facebook example: https://www.facebook.com/your_username."
+        ) : resource === "skill-categories" ? (
           "Choose Visible to show this group on the Skills page, or Hidden to hide the group and its skills. Your skills and assignments are kept. Lower display order values appear first. Save changes to apply your settings."
         ) : ["project-categories", "technologies"].includes(resource) ? (
           "Choose Visible to show this item in public filters and labels, or Hidden to keep it in your admin library. Hiding a label does not hide its projects. Use a lowercase slug with hyphens, then save changes."
@@ -274,6 +276,24 @@ export function ContentForm({
                     <option value="true">Visible</option>
                     <option value="false">Hidden</option>
                   </select>
+                ) : resource === "social-links" && name === "platform" ? (
+                  <>
+                    <input
+                      id={id}
+                      name={name}
+                      list="social-platforms"
+                      defaultValue={value}
+                      required={spec.required}
+                      placeholder="Choose or type a platform"
+                    />
+                    <datalist id="social-platforms">
+                      {["GitHub", "LinkedIn", "Telegram", "Facebook"].map(
+                        (platform) => (
+                          <option key={platform} value={platform} />
+                        ),
+                      )}
+                    </datalist>
+                  </>
                 ) : spec.type === "checkbox" ? (
                   <input
                     id={id}

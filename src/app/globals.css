@@ -1778,3 +1778,111 @@ td {
     grid-template-columns: 1fr;
   }
 }
+
+.header-socials {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.header-socials .icon-button {
+  border-radius: 10px;
+}
+@media (max-width: 600px) {
+  .header-top:has(.header-socials) {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-top:has(.header-socials) .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .header-top:has(.header-socials) .action-divider {
+    margin-left: auto;
+  }
+}
+
+.admin-mobile-menu-toggle {
+  display: none;
+}
+@media (max-width: 600px) {
+  .admin-sidebar {
+    padding: 14px 18px;
+    position: sticky;
+    top: var(--admin-header-height, 76px);
+    z-index: 20;
+  }
+  .admin-mobile-menu-toggle {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    text-align: left;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    min-height: 64px;
+  }
+  .admin-mobile-menu-toggle > span {
+    display: grid;
+    gap: 3px;
+  }
+  .admin-mobile-menu-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .admin-mobile-menu-toggle strong {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .admin-mobile-menu-toggle[aria-expanded="true"] {
+    border-color: var(--accent);
+    background: var(--soft);
+  }
+  .admin-sidebar-menu {
+    display: none;
+  }
+  .admin-sidebar-menu.is-open {
+    display: block;
+    padding: 18px 4px 4px;
+    max-height: calc(100dvh - var(--admin-header-height, 76px) - 100px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .admin-sidebar-menu .eyebrow {
+    display: none;
+  }
+  .admin-sidebar-menu .admin-name {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0 10px 12px;
+  }
+  .admin-sidebar nav {
+    grid-template-columns: 1fr;
+    gap: 4px;
+    max-height: none;
+    overscroll-behavior: contain;
+    padding: 4px;
+    margin-bottom: 14px;
+  }
+  .admin-sidebar nav button {
+    min-height: 44px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+  .admin-sidebar nav button.active {
+    box-shadow: inset 3px 0 var(--accent);
+    font-weight: 600;
+  }
+  .admin-sidebar-menu > .button {
+    width: 100%;
+  }
+}

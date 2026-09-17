@@ -1,12 +1,14 @@
 import { PortfolioNavigation } from "./portfolio-navigation";
 import { optionalContent } from "@/services/content";
 
-function profileUrl(value: string | undefined, host: string) {
+function profileUrl(value: string | undefined, ...hosts: string[]) {
   if (!value) return null;
   try {
     const url = new URL(value);
     return url.protocol === "https:" &&
-      (url.hostname === host || url.hostname === `www.${host}`) &&
+      hosts.some(
+        (host) => url.hostname === host || url.hostname === `www.${host}`,
+      ) &&
       url.pathname !== "/"
       ? url.href
       : null;
@@ -24,7 +26,23 @@ export async function SiteHeader() {
   const linkedin = socialLinks?.data.find(
     (item) => item.platform?.toLowerCase() === "linkedin",
   )?.url;
+  const telegram = socialLinks?.data.find(
+    (item) => item.platform?.trim().toLowerCase() === "telegram",
+  )?.url;
+  const facebook = socialLinks?.data.find(
+    (item) => item.platform?.trim().toLowerCase() === "facebook",
+  )?.url;
   const profiles = [
+    {
+      label: "Telegram",
+      href: profileUrl(telegram, "t.me", "telegram.me"),
+      path: "M21.4 3.4 18.2 20c-.2 1.2-.9 1.5-1.9.9l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.4-5 9-8.1c.4-.4-.1-.6-.6-.2L5.7 13.7l-4.8-1.5c-1-.3-1-1 .2-1.5L20 3.4c.9-.3 1.6.2 1.4 0Z",
+    },
+    {
+      label: "Facebook",
+      href: profileUrl(facebook, "facebook.com", "m.facebook.com", "fb.com"),
+      path: "M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.03 1.79-4.71 4.53-4.71 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.88v2.28h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07Z",
+    },
     {
       label: "GitHub",
       href: profileUrl(
@@ -44,35 +62,38 @@ export async function SiteHeader() {
   ];
   return (
     <PortfolioNavigation logo={profile?.logo}>
-      {profiles.map((profile) => {
-        const icon = (
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
-            <path d={profile.path} />
-          </svg>
-        );
-        return profile.href ? (
-          <a
-            key={profile.label}
-            href={profile.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="icon-button"
-            aria-label={`${profile.label} profile (opens in a new tab)`}
-          >
-            {icon}
-          </a>
-        ) : (
-          <span
-            key={profile.label}
-            className="icon-button social-unconfigured"
-            role="img"
-            aria-label={`${profile.label} profile not added yet`}
-            title={`${profile.label} profile not added yet`}
-          >
-            {icon}
-          </span>
-        );
-      })}
+      <div className="header-socials" role="group" aria-label="Social profiles">
+        {profiles.map((profile) => {
+          const icon = (
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+              <path d={profile.path} />
+            </svg>
+          );
+          return profile.href ? (
+            <a
+              key={profile.label}
+              href={profile.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="icon-button"
+              aria-label={`${profile.label} profile (opens in a new tab)`}
+              title={profile.label}
+            >
+              {icon}
+            </a>
+          ) : (
+            <span
+              key={profile.label}
+              className="icon-button social-unconfigured"
+              role="img"
+              aria-label={`${profile.label} profile not added yet`}
+              title={`${profile.label} profile not added yet`}
+            >
+              {icon}
+            </span>
+          );
+        })}
+      </div>
     </PortfolioNavigation>
   );
 }

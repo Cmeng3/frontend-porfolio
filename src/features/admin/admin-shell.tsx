@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { adminMenu } from "@/lib/admin-navigation";
 import { adminRequest, AdminError } from "@/services/admin";
@@ -31,14 +31,35 @@ export function AdminShell({
   const [error, setError] = useState("");
   const [version, setVersion] = useState(0);
   const [websiteDirty, setWebsiteDirty] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const menuToggle = useRef<HTMLButtonElement>(null);
+  const layout = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const header = document.querySelector<HTMLElement>(".site-header");
+    if (!header || !user) return;
+    const updateOffset = () =>
+      layout.current?.style.setProperty(
+        "--admin-header-height",
+        `${header.getBoundingClientRect().height}px`,
+      );
+    updateOffset();
+    const observer = new ResizeObserver(updateOffset);
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, [user]);
   function selectSection(section: string) {
-    if (section === selected) return;
+    if (section === selected) {
+      setMobileMenuOpen(false);
+      menuToggle.current?.focus();
+      return;
+    }
     if (
       websiteDirty &&
       !window.confirm("You have unsaved website changes. Leave without saving?")
     )
       return;
     setWebsiteDirty(false);
+    setMobileMenuOpen(false);
     router.push(section === "dashboard" ? "/admin" : "/admin/" + section);
     window.scrollTo({ top: 0 });
   }
@@ -169,25 +190,64 @@ export function AdminShell({
     );
   if (selected === "login") return <p role="status">Opening your workspace…</p>;
   return (
-    <div className="admin-layout">
-      <aside className="admin-sidebar">
-        <p className="eyebrow">Content workspace</p>
-        <p className="admin-name">{user.name}</p>
-        <nav aria-label="Admin navigation">
-          {menu.map(([key, label]) => (
-            <button
-              key={key}
-              className={key === selected ? "active" : ""}
-              aria-current={key === selected ? "page" : undefined}
-              onClick={() => selectSection(key)}
-            >
-              {label}
-            </button>
-          ))}
-        </nav>
-        <button className="button secondary" onClick={logout}>
-          Logout
+    <div className="admin-layout" ref={layout}>
+      <aside
+        className="admin-sidebar"
+        onKeyDown={(event) => {
+          if (event.key === "Escape" && mobileMenuOpen) {
+            setMobileMenuOpen(false);
+            menuToggle.current?.focus();
+          }
+        }}
+      >
+        <button
+          ref={menuToggle}
+          type="button"
+          className="admin-mobile-menu-toggle"
+          aria-expanded={mobileMenuOpen}
+          aria-controls="admin-sidebar-menu"
+          onClick={() => setMobileMenuOpen((open) => !open)}
+        >
+          <span>
+            <span className="admin-mobile-menu-label">Admin menu</span>
+            <strong>
+              {menu.find(([key]) => key === selected)?.[1] || "Dashboard"}
+            </strong>
+          </span>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d={mobileMenuOpen ? "m6 15 6-6 6 6" : "m6 9 6 6 6-6"} />
+          </svg>
         </button>
+        <div
+          id="admin-sidebar-menu"
+          className={`admin-sidebar-menu ${mobileMenuOpen ? "is-open" : ""}`}
+        >
+          <p className="eyebrow">Content workspace</p>
+          <p className="admin-name">{user.name}</p>
+          <nav aria-label="Admin navigation">
+            {menu.map(([key, label]) => (
+              <button
+                key={key}
+                className={key === selected ? "active" : ""}
+                aria-current={key === selected ? "page" : undefined}
+                onClick={() => selectSection(key)}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
+          <button className="button secondary" onClick={logout}>
+            Logout
+          </button>
+        </div>
       </aside>
       <div className="admin-content">
         <p role="alert" className="error-message">

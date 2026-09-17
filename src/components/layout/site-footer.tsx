@@ -1,5 +1,5 @@
 import { siteSettings } from "@/services/site";
-import Link from "next/link";
+import { ManageWebsiteLink } from "./manage-website-link";
 import { optionalContent } from "@/services/content";
 export async function SiteFooter() {
   const settings = await siteSettings();
@@ -11,9 +11,7 @@ export async function SiteFooter() {
           © {new Date().getFullYear()} {profiles?.data[0]?.name || "Chimeng Ly"}
         </p>
         <p>{settings.footer}</p>
-        <Link className="text-link" href="/admin">
-          Manage website
-        </Link>
+        <ManageWebsiteLink />
       </div>
     </footer>
   );

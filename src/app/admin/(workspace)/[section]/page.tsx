@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { AdminShell } from "@/features/admin/admin-shell";
 import { adminMenu } from "@/lib/admin-navigation";
 
 export const metadata: Metadata = {
@@ -15,9 +14,5 @@ export default async function AdminSectionPage({
 }) {
   const { section } = await params;
   if (!adminMenu.some(([key]) => key === section)) notFound();
-  return (
-    <main id="main-content">
-      <AdminShell key={section} initialSection={section} />
-    </main>
-  );
+  return null;
 }

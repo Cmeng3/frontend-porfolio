@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { adminMenu } from "@/lib/admin-navigation";
 import { adminRequest, AdminError } from "@/services/admin";
-import { LoginPanel } from "./login-panel";
 import { ContentManager } from "./content-manager";
 import { MediaLibrary } from "./media-library";
 import { WebsiteEditor } from "./website-editor";
@@ -16,12 +15,9 @@ type Dashboard = {
   projects: RecordData[];
 };
 const menu = adminMenu;
-export function AdminShell({
-  initialSection = "dashboard",
-}: {
-  initialSection?: string;
-}) {
+export function AdminShell() {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<{ name: string } | null | undefined>(
     undefined,
   );
@@ -29,7 +25,7 @@ export function AdminShell({
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [dashboardError, setDashboardError] = useState("");
   const [dashboardVersion, setDashboardVersion] = useState(0);
-  const selected = initialSection;
+  const selected = pathname.split("/")[2] || "dashboard";
   const [error, setError] = useState("");
   const [version, setVersion] = useState(0);
   const [websiteDirty, setWebsiteDirty] = useState(false);
@@ -144,9 +140,6 @@ export function AdminShell({
     };
   }, [user, selected, dashboardVersion]);
   useEffect(() => {
-    if (user && selected === "login") router.replace("/admin");
-  }, [user, selected, router]);
-  useEffect(() => {
     function expired() {
       setUser(null);
       setSchema({});
@@ -203,13 +196,7 @@ export function AdminShell({
         )}
       </div>
     );
-  if (!user)
-    return selected === "login" ? (
-      <LoginPanel onLogin={() => router.replace("/admin")} />
-    ) : (
-      <p role="status">Redirecting to sign in…</p>
-    );
-  if (selected === "login") return <p role="status">Opening your workspace…</p>;
+  if (!user) return <p role="status">Redirecting to sign in…</p>;
   return (
     <div className="admin-layout" ref={layout}>
       <aside

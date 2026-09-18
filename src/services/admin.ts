@@ -1,6 +1,7 @@
 const base =
-  (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1") +
-  "/admin";
+  (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1")
+    .trim()
+    .replace(/\/+$/, "") + "/admin";
 export class AdminError extends Error {
   constructor(
     public status: number,
@@ -8,6 +9,17 @@ export class AdminError extends Error {
     public errors: Record<string, string[]> = {},
   ) {
     super(message);
+  }
+}
+async function readAdminJson(response: Response, path: string) {
+  const message = `The API returned an unexpected response for ${path} (HTTP ${response.status}). Please try again. If this continues, check the backend deployment logs.`;
+  if (!response.headers.get("content-type")?.includes("json")) {
+    throw new AdminError(response.status, message);
+  }
+  try {
+    return await response.json();
+  } catch {
+    throw new AdminError(response.status, message);
   }
 }
 export async function adminRequest<T>(
@@ -18,6 +30,7 @@ export async function adminRequest<T>(
   const headers: Record<string, string> = { Accept: "application/json" };
   if (method !== "GET") {
     const csrf = await fetch(base + "/csrf", {
+      headers: { Accept: "application/json" },
       credentials: "include",
       cache: "no-store",
       signal: AbortSignal.timeout(15000),
@@ -27,7 +40,14 @@ export async function adminRequest<T>(
         csrf.status,
         "Could not start a secure session. Please reload.",
       );
-    headers["X-CSRF-TOKEN"] = (await csrf.json()).token;
+    const session = await readAdminJson(csrf, "csrf");
+    if (typeof session?.token !== "string" || !session.token) {
+      throw new AdminError(
+        csrf.status,
+        "The API did not return a session token. Please try again.",
+      );
+    }
+    headers["X-CSRF-TOKEN"] = session.token;
   }
   const multipart = body instanceof FormData;
   if (body !== undefined && !multipart)
@@ -49,7 +69,7 @@ export async function adminRequest<T>(
   ) {
     window.dispatchEvent(new Event("admin-session-expired"));
   }
-  const data = await response.json();
+  const data = await readAdminJson(response, path);
   if (!response.ok)
     throw new AdminError(
       response.status,

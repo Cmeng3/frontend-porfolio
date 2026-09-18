@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AdminShell } from "@/features/admin/admin-shell";
+import { AdminLogin } from "@/features/admin/admin-login";
 
 export const metadata: Metadata = {
   title: "Admin sign in",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function AdminLoginPage() {
   return (
     <main id="main-content">
-      <AdminShell initialSection="login" />
+      <AdminLogin />
     </main>
   );
 }

@@ -27,6 +27,8 @@ export function AdminShell({
   );
   const [schema, setSchema] = useState<Schema>({});
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
+  const [dashboardError, setDashboardError] = useState("");
+  const [dashboardVersion, setDashboardVersion] = useState(0);
   const selected = initialSection;
   const [error, setError] = useState("");
   const [version, setVersion] = useState(0);
@@ -95,14 +97,10 @@ export function AdminShell({
     async function load() {
       try {
         const me = await adminRequest<{ data: { name: string } }>("me");
-        const [definitions, overview] = await Promise.all([
-          adminRequest<{ data: Schema }>("schema"),
-          adminRequest<{ data: Dashboard }>("dashboard"),
-        ]);
+        const definitions = await adminRequest<{ data: Schema }>("schema");
         if (active) {
           setUser(me.data);
           setSchema(definitions.data);
-          setDashboard(overview.data);
           setError("");
         }
       } catch (e) {
@@ -122,6 +120,29 @@ export function AdminShell({
       active = false;
     };
   }, [version, router]);
+  useEffect(() => {
+    if (!user || selected !== "dashboard") return;
+    let active = true;
+    async function loadOverview() {
+      setDashboard(null);
+      setDashboardError("");
+      try {
+        const overview = await adminRequest<{ data: Dashboard }>("dashboard");
+        if (active) setDashboard(overview.data);
+      } catch (error) {
+        if (active)
+          setDashboardError(
+            error instanceof Error
+              ? error.message
+              : "Could not load the dashboard.",
+          );
+      }
+    }
+    void loadOverview();
+    return () => {
+      active = false;
+    };
+  }, [user, selected, dashboardVersion]);
   useEffect(() => {
     if (user && selected === "login") router.replace("/admin");
   }, [user, selected, router]);
@@ -287,41 +308,61 @@ export function AdminShell({
                 </span>
               </button>
             </div>
-            <div className="stat-grid">
-              {Object.entries(dashboard?.counts || {}).map(([label, value]) => (
-                <div className="stat-card" key={label}>
-                  <span>{label}</span>
-                  <strong>{value}</strong>
+            {dashboard ? (
+              <>
+                <div className="stat-grid">
+                  {Object.entries(dashboard?.counts || {}).map(
+                    ([label, value]) => (
+                      <div className="stat-card" key={label}>
+                        <span>{label}</span>
+                        <strong>{value}</strong>
+                      </div>
+                    ),
+                  )}
                 </div>
-              ))}
-            </div>
-            <section className="section-block">
-              <h2>Recent messages</h2>
-              {dashboard?.messages.length ? (
-                dashboard.messages.map((m) => (
-                  <article className="dashboard-row" key={m.id}>
-                    <div>
-                      <strong>{String(m.name)}</strong>
-                      <p>{String(m.subject || "No subject")}</p>
+                <section className="section-block">
+                  <h2>Recent messages</h2>
+                  {dashboard?.messages.length ? (
+                    dashboard.messages.map((m) => (
+                      <article className="dashboard-row" key={m.id}>
+                        <div>
+                          <strong>{String(m.name)}</strong>
+                          <p>{String(m.subject || "No subject")}</p>
+                        </div>
+                        <span className="badge">{String(m.status)}</span>
+                      </article>
+                    ))
+                  ) : (
+                    <p className="muted">No messages yet.</p>
+                  )}
+                </section>
+                <section className="section-block">
+                  <h2>Recently updated projects</h2>
+                  {dashboard?.projects.map((p) => (
+                    <div className="dashboard-row" key={p.id}>
+                      <strong>{String(p.title)}</strong>
+                      <span className="badge">
+                        {p.published_at ? "Published" : "Draft"}
+                      </span>
                     </div>
-                    <span className="badge">{String(m.status)}</span>
-                  </article>
-                ))
-              ) : (
-                <p className="muted">No messages yet.</p>
-              )}
-            </section>
-            <section className="section-block">
-              <h2>Recently updated projects</h2>
-              {dashboard?.projects.map((p) => (
-                <div className="dashboard-row" key={p.id}>
-                  <strong>{String(p.title)}</strong>
-                  <span className="badge">
-                    {p.published_at ? "Published" : "Draft"}
-                  </span>
-                </div>
-              ))}
-            </section>
+                  ))}
+                </section>
+              </>
+            ) : (
+              <section className="section-block">
+                <p role={dashboardError ? "alert" : "status"}>
+                  {dashboardError || "Loading dashboard statistics…"}
+                </p>
+                {dashboardError && (
+                  <button
+                    className="button secondary"
+                    onClick={() => setDashboardVersion((value) => value + 1)}
+                  >
+                    Retry dashboard
+                  </button>
+                )}
+              </section>
+            )}
           </>
         ) : selected === "website" ? (
           <WebsiteEditor onDirtyChange={setWebsiteDirty} />
